@@ -4,7 +4,7 @@ import logging
 import html
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-from google import genai
+import google.generativeai as genai
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -41,58 +41,50 @@ def scrape_article_text(url):
     if not url:
         return ""
     try:
-        headers = {'User-Agent': 'Mozilla/5.0'}
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
         response = requests.get(url, headers=headers, timeout=5)
         soup = BeautifulSoup(response.content, 'html.parser')
         for script in soup(["script", "style", "nav", "footer", "header"]):
             script.extract()
         text = soup.get_text(separator=' ')
-        return ' '.join(text.split())[:3000]
+        return ' '.join(text.split())[:2000] # Reduced context to save space
     except Exception as e:
         logger.warning(f"Could not scrape {url}: {e}")
         return ""
 
 def generate_ai_briefing(stories):
-    """Uses the modern Google GenAI library to summarize stories."""
-    logger.info("Generating Ultra-Premium Briefing with Gemini...")
+    """Uses Google Gemini to summarize stories."""
+    logger.info("Generating AI Briefing with Gemini...")
     if not GEMINI_API_KEY:
         return "Error: GEMINI_API_KEY is not set."
         
+    genai.configure(api_key=GEMINI_API_KEY)
+    model_name = 'models/gemini-2.5-flash-lite'
     try:
-        # Initialize the modern GenAI client
-        client = genai.Client(api_key=GEMINI_API_KEY)
+        model = genai.GenerativeModel(model_name)
+    except Exception as e:
+        return f"Error initializing model {model_name}: {e}"
+
+    prompt = """
+    You are an elite AI Tech Futurist. Create a 'Global Tech Intelligence Briefing' based on the following stories.
+    
+    STRICT RULES:
+    1. Use ONLY these HTML tags: <b>, <i>, <a>. 
+    2. Start with: <b>🌐 GLOBAL TECH INTELLIGENCE</b>
+    3. Keep the TOTAL response under 3000 characters.
+    4. For each story: Emoji + <b>TITLE</b> + 1-sentence summary + <i>Strategic Impact</i>.
+    5. End with a 🧠 BRAIN FUEL quote.
+    """
+    
+    for i, story in enumerate(stories, 1):
+        prompt += f"\nStory {i}: {story.get('title')}\nContext: {scrape_article_text(story.get('url'))}\n"
         
-        # Build the prompt
-        prompt = """
-        You are an elite AI Tech Futurist and Lead Journalist at a top-tier tech newsletter. Create a 'Global Tech Intelligence Briefing' based on the following Hacker News data.
-        
-        TONE: Professional, insightful, and visionary.
-        
-        STRICT FORMATTING & STRUCTURE (HTML ONLY):
-        1. HEADER: <b>🌐 GLOBAL TECH INTELLIGENCE</b>
-        2. EXECUTIVE SUMMARY: A 2-sentence high-level overview of today's tech mood.
-        3. THE STORIES:
-           - Use a themed emoji for each story.
-           - <b>STORY TITLE IN ALL CAPS</b>
-           - A concise, high-signal summary.
-           - <b>Strategic Impact:</b> <i>Why this matters for the future of the industry.</i>
-        4. 🧠 BRAIN FUEL: A world-class productivity tip or a quote from a tech visionary.
-        
-        Use <b>bold</b> and <i>italic</i> tags generously.
-        """
-        
-        for i, story in enumerate(stories, 1):
-            prompt += f"\nStory {i}: {story.get('title')}\nContext: {scrape_article_text(story.get('url'))}\n"
-            
-        # Generate content using the new 2.0-flash model
-        response = client.models.generate_content(
-            model='gemini-2.0-flash',
-            contents=prompt
-        )
+    try:
+        response = model.generate_content(prompt)
         return response.text
     except Exception as e:
-        logger.error(f"Gemini Error: {e}")
-        return f"Failed to generate summary. Ensure your API Key is correct and has no extra spaces."
+        logger.error(f"Gemini API Error: {e}")
+        return f"Failed to generate AI summary: {e}"
 
 def send_telegram_message(message):
     """Sends the final briefing to Telegram."""
@@ -101,16 +93,23 @@ def send_telegram_message(message):
         logger.error("Missing Telegram credentials.")
         return
         
-    safe_message = html.escape(message)
+    # We don't use html.escape() on the WHOLE message because the AI is generating HTML tags.
+    # Instead, we just ensure the message isn't empty or null.
+    if not message:
+        logger.error("Briefing message is empty.")
+        return
+
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
         "chat_id": TELEGRAM_CHAT_ID,
-        "text": f"<b>🌅 Your AI Morning Tech Briefing</b>\n\n{safe_message}",
+        "text": f"<b>🌅 Your AI Morning Tech Briefing</b>\n\n{message}",
         "parse_mode": "HTML"
     }
     
     try:
         response = requests.post(url, json=payload)
+        if response.status_code != 200:
+             logger.error(f"Telegram Error: {response.text}")
         response.raise_for_status()
         logger.info("✅ Briefing sent successfully!")
     except Exception as e:
