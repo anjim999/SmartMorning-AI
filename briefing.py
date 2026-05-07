@@ -120,6 +120,15 @@ def main():
     stories = get_top_hn_stories(limit=5)
     if stories:
         briefing_text = generate_ai_briefing(stories)
+        
+        # --- NEW ARCHIVE FEATURE ---
+        from datetime import datetime
+        with open("ARCHIVE.md", "a") as f:
+            f.write(f"\n\n# 📅 Briefing: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n")
+            f.write(briefing_text)
+            f.write("\n---")
+        # ---------------------------
+
         send_telegram_message(briefing_text)
 
 if __name__ == "__main__":
