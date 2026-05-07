@@ -1,32 +1,40 @@
-# 🚀 SmartMorning-AI: Autonomous Morning Briefing Engine
+# 🌐 SmartMorning-AI: Autonomous Tech Intelligence Engine
 
-An elite, autonomous intelligence system that ensures you start your day with the most critical tech insights, distilled by Gemini 2.5-Flash and delivered directly to your device.
+**SmartMorning-AI** is a high-performance, autonomous agentic pipeline designed to distill global tech trends into actionable intelligence. Built for engineers and founders who value high-signal data with zero manual effort.
 
-## 🚀 The Problem
-As an aspiring engineer, keeping up with the rapid pace of tech news (Hacker News, TechCrunch, etc.) can be a 30-minute daily distraction. I built this to reclaim that time.
+## 🚀 The Vision
+In an era of information overload, the most valuable asset is time. **SmartMorning-AI** reclaims 30 minutes of your morning by autonomously identifying, scraping, and synthesizing the most critical stories from the global tech frontier.
 
-## 🧠 How it Works
-This project is a **Full-Stack Automation Pipeline**:
-1.  **Data Ingestion:** A Python script connects to the Hacker News API to identify the top 5 trending stories.
-2.  **Web Scraping:** It dynamically scrapes the article content from the source URLs using `BeautifulSoup4`.
-3.  **AI Synthesis:** The raw text is passed to the **Google Gemini 2.5-Flash** model. The AI synthesizes multiple long-form articles into a single, high-signal "Intelligence Briefing."
-4.  **Autonomous Delivery:** The briefing is formatted into HTML and pushed to my Telegram via the Telegram Bot API.
-5.  **Linux Daemon:** The entire process is scheduled as a background `cron` job to run autonomously every morning at 8:00 AM.
+## 🛠️ System Architecture
+The engine operates as a multi-stage autonomous pipeline:
+1.  **Ingestion:** Connects to the Hacker News API to retrieve top-tier trending items.
+2.  **Web-Extraction:** Employs `BeautifulSoup4` with custom headers to bypass simple bot-protections and extract high-density article content.
+3.  **Neural Synthesis:** Utilizes the **Gemini 2.5-Flash** LLM (via Google AI Studio) to perform deep semantic analysis. It doesn't just summarize—it analyzes **Strategic Impact**.
+4.  **Delivery:** Formats the intelligence into a premium HTML briefing and pushes it to the user's Telegram via a dedicated bot interface.
+5.  **Autonomous Scheduling:** Deployed via **GitHub Actions (Cron)** for serverless, 24/7 reliability, and locally via **Linux Systemd/Cron**.
 
-## 🛠️ Tech Stack
-- **Language:** Python 3
-- **AI Model:** Google Gemini 2.5-Flash (LLM)
-- **APIs:** Telegram Bot API, Hacker News API
-- **Libraries:** `requests`, `beautifulsoup4`, `google-generativeai`, `python-dotenv`
-- **Infrastructure:** Linux Crontab (Automation)
+## 🧬 Tech Stack
+- **AI Core:** Google Gemini 2.5-Flash
+- **Automation:** GitHub Actions (CI/CD / Scheduling)
+- **Networking:** Telegram Bot API, HN Firebase API
+- **Processing:** Python 3.x, Requests, BeautifulSoup4
+- **Security:** Environment-based secret management (Dotenv / GitHub Secrets)
 
-## 📦 Setup & Deployment
-1.  **Local Setup:** `pip install -r requirements.txt` and fill the `.env` file.
-2.  **Serverless Automation (GitHub Actions):** 
-    - Push this code to a GitHub Repository.
-    - Go to **Settings > Secrets and Variables > Actions**.
-    - Add three secrets: `GEMINI_API_KEY`, `TELEGRAM_BOT_TOKEN`, and `TELEGRAM_CHAT_ID`.
-    - The system will now run automatically every morning at 8:00 AM IST!
+## 📦 Deployment & Automation
+### 1. Local Execution
+```bash
+pip install -r requirements.txt
+python briefing.py
+```
+
+### 2. Full Autonomy (GitHub Actions)
+1.  Push code to a private or public GitHub Repository.
+2.  Navigate to **Settings > Secrets and Variables > Actions**.
+3.  Add the following secrets:
+    - `GEMINI_API_KEY`: Your Google AI Studio Key.
+    - `TELEGRAM_BOT_TOKEN`: Your Bot Token from @BotFather.
+    - `TELEGRAM_CHAT_ID`: Your unique Telegram ID.
+4.  The system will now autonomously deliver your briefing every day at 8:00 AM IST.
 
 ---
-*Built for the PainMed-PA Engineering Internship Application.*
+*Developed as a showcase of AI Orchestration and Automation for the PainMed-PA Engineering Internship.*
